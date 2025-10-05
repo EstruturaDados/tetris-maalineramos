@@ -109,14 +109,11 @@ void exibirPilha(Pilha *p) {
     printf("\n");
 }
 
-void menu() {
-    printf("\n===== MENU =====\n");
-    printf("1 - Jogar peça\n");
-    printf("2 - Reservar peça\n");
-    printf("3 - Usar peça da reserva\n");
-    printf("0 - Sair\n");
-    printf("Escolha uma opção: ");
+void exibirEstadoAtual(Fila *f, Pilha *p) {
+    exibirFila(f);
+    exibirPilha(p);
 }
+
 
 void gerarPeca(Peca *p, int *idGlobal) {
     char tipos[] = {'I', 'O', 'T', 'L'};
@@ -126,6 +123,42 @@ void gerarPeca(Peca *p, int *idGlobal) {
     p->id = (*idGlobal)++;
 }
 
+void trocarFrenteComTopo(Fila *f, Pilha *p) {
+    if (filaVazia(f) || pilhaVazia(p)) {
+        printf("Nao e possivel trocar! Fila ou Pilha vazia.\n");
+        return;
+    }
+    int idxFila = f->inicio;
+    Peca temp = f->itens[f->inicio];
+    f->itens[f->inicio] = p->itens[p->topo];
+    p->itens[p->topo] = temp;
+    printf("Troca realizada entre a frente da fila e o topo da pilha.\n");
+}
+
+void trocarTres(Fila *f, Pilha *p) {
+    if (f->total < 3 || p->topo < 2) {
+        printf("Nao e possivel trocar! Fila ou Pilha nao possuem 3 pecas.\n");
+        return;
+    }
+    for (int i = 0; i < 3; i++) {
+        int idxFila = (f->inicio + i) % MAX;
+        Peca temp = f->itens[idxFila];
+        f->itens[idxFila] = p->itens[p->topo - i];
+        p->itens[p->topo - i] = temp;
+    }
+    printf("Troca realizada entre os 3 primeiros da fila e os 3 da pilha.\n");
+}
+
+void menu() {
+    printf("\n===== MENU =====\n");
+    printf("1 - Jogar peça\n");
+    printf("2 - Reservar peça\n");
+    printf("3 - Usar peça da reserva\n");
+    printf("4 - Trocar peça da frente com topo da pilha\n");
+    printf("5 - Trocar 3 primeiros da fila com os 3 da pilha\n");
+    printf("0 - Sair\n");
+    printf("Escolha uma opção: ");
+}
 
 int main() {
     srand(time(NULL));
@@ -155,14 +188,13 @@ int main() {
     
     int opcao;
     do {
-        exibirFila(&f);
-        exibirPilha(&reserva);
+        exibirEstadoAtual(&f, &reserva);
         menu();
         scanf("%d", &opcao);
         getchar(); // Limpar o buffer do teclado
         printf("\n");
         
-        Peca removida, novaPeca, temp;
+        Peca temp;
     
         switch (opcao)
         {
@@ -195,6 +227,14 @@ int main() {
                 pop(&reserva, &temp);
                 printf("Peca usada da reserva: [%s, %d]\n", temp.tipo, temp.id);
             }
+            break;
+        case 4:
+            // Trocar peça da frente com topo da pilha
+            trocarFrenteComTopo(&f, &reserva);
+            break;
+        case 5:
+            // Trocar 3 primeiros da fila com os 3 da pilha
+            trocarTres(&f, &reserva);
             break;
         case 0:
             printf("Saindo...\n");
