@@ -1,12 +1,90 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
 // Desafio Tetris Stack
 // Tema 3 - Integração de Fila e Pilha
 // Este código inicial serve como base para o desenvolvimento do sistema de controle de peças.
 // Use as instruções de cada nível para desenvolver o desafio.
+#define MAX 5
+
+typedef struct {
+    char tipo[2];
+    int id;
+} Peca;
+
+typedef struct {
+    Peca itens[MAX];
+    int inicio;
+    int fim;
+    int total;
+} Fila;
+
+void inicializarFila(Fila *f) {
+    f->inicio = 0;
+    f->fim = 0;
+    f->total = 0;
+}
+
+int filaCheia(Fila *f) {
+    return f->total == MAX;
+}
+
+int filaVazia(Fila *f) {
+    return f->total == 0;
+}
+
+void inserir(Fila *f, Peca *p){
+    if(filaCheia(f)){
+        printf("Fila cheia! Nao e possivel inserir.\n");
+        return;
+    }
+    f->itens[f->fim] = *p;// Insere o elemento no fim da fila
+    f->fim = (f->fim + 1) % MAX;// Incrementa o índice do fim circularmente
+    f->total++;// Incrementa o total de elementos na fila
+
+}
+
+void remover(Fila *f, Peca *p) {
+    if (filaVazia(f)) {
+        printf("Fila vazia! Nao e possivel remover.\n");
+        return;
+    }
+    *p = f->itens[f->inicio];// Obtém o elemento do início da fila
+    f->inicio = (f->inicio + 1) % MAX;// Incrementa o índice do início circularmente
+    f->total--;// Decrementa o total de elementos na fila
+    
+}
+
+void exibirFila(Fila *f) {
+  printf("Fila Atual: ");
+
+  for (int i = 0, idx = f->inicio; i < f->total; i++, idx = (idx + 1) % MAX) {
+    printf("[%s, %d] ", f->itens[idx].tipo, f->itens[idx].id);
+  }
+  printf("\n");
+}
+
+void menu() {
+    printf("\nMenu:\n");
+    printf("1 - Jogar peça (remover da frente)\n");
+    printf("2 - Inserir nova peça (adicionar ao fim)\n");
+    printf("0 - Sair\n");
+    printf("Escolha uma opção: ");
+}
+
+void gerarPeca(Peca *p, int *idGlobal) {
+    char tipos[] = {'I', 'O', 'T', 'L'};
+    int indice = rand() % 4; 
+    p->tipo[0] = tipos[indice];
+    p->tipo[1] = '\0';
+    p->id = (*idGlobal)++;
+}
+
 
 int main() {
-
+    srand(time(NULL));
+    Fila f;
     // 🧩 Nível Novato: Fila de Peças Futuras
     //
     // - Crie uma struct Peca com os campos: tipo (char) e id (int).
@@ -18,6 +96,50 @@ int main() {
     //      1 - Jogar peça (remover da frente)
     //      0 - Sair
     // - A cada remoção, insira uma nova peça ao final da fila.
+    
+    inicializarFila(&f);
+
+    int 
+
+    idGlobal = 1;
+    for (int i = 0; i < MAX; i++) {
+        Peca nova;
+        gerarPeca(&nova, &idGlobal);
+        inserir(&f, &nova);
+    }
+
+    
+    int opcao;
+    do {
+        exibirFila(&f);
+        menu();
+        scanf("%d", &opcao);
+        printf("\n");
+        
+        Peca removida, novaPeca;
+    
+        switch (opcao)
+        {
+        case 1:
+            ;
+            remover(&f, &removida);
+            printf("Peca jogada: [%s, %d]\n", removida.tipo, removida.id);
+            break;
+        case 2:
+            gerarPeca(&novaPeca, &idGlobal);
+            inserir(&f, &novaPeca);
+            printf("Nova peca inserida: [%s, %d]\n", novaPeca.tipo, novaPeca.id);
+            break;
+        
+        case 0:
+            printf("Saindo...\n");
+            break;
+        default:
+            printf("Opção inválida! Tente novamente.\n");
+            break;
+        }
+    } while (opcao != 0);
+ 
 
 
 
