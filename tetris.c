@@ -7,6 +7,7 @@
 // Este código inicial serve como base para o desenvolvimento do sistema de controle de peças.
 // Use as instruções de cada nível para desenvolver o desafio.
 #define MAX 5
+#define MAX_PILHA 3
 
 typedef struct {
     char tipo[2];
@@ -20,18 +21,35 @@ typedef struct {
     int total;
 } Fila;
 
+typedef struct {
+    Peca itens[MAX_PILHA];
+    int topo;
+} Pilha;
+
 void inicializarFila(Fila *f) {
     f->inicio = 0;
     f->fim = 0;
     f->total = 0;
 }
 
+void inicializarPilha(Pilha *p) {
+    p->topo = -1;
+}
+
 int filaCheia(Fila *f) {
     return f->total == MAX;
 }
 
+int pilhaCheia(Pilha *p) {
+    return p->topo == MAX_PILHA - 1;
+}
+
 int filaVazia(Fila *f) {
     return f->total == 0;
+}
+
+int pilhaVazia(Pilha *p) {
+    return p->topo == -1;
 }
 
 void inserir(Fila *f, Peca *p){
@@ -45,6 +63,15 @@ void inserir(Fila *f, Peca *p){
 
 }
 
+void push(Pilha *p, Peca *nova) {
+    if (pilhaCheia(p)) {
+        printf("Pilha cheia! Nao e possivel inserir.\n");
+        return;
+    }
+    p->topo++;
+    p->itens[p->topo] = *nova;
+}
+
 void remover(Fila *f, Peca *p) {
     if (filaVazia(f)) {
         printf("Fila vazia! Nao e possivel remover.\n");
@@ -56,8 +83,17 @@ void remover(Fila *f, Peca *p) {
     
 }
 
+void pop(Pilha *p, Peca *removida) {
+    if (pilhaVazia(p)) {
+        printf("Pilha vazia! Nao e possivel remover.\n");
+        return;
+    }
+    *removida = p->itens[p->topo];
+    p->topo--;
+}
+
 void exibirFila(Fila *f) {
-  printf("Fila Atual: ");
+  printf("Fila de Peças: ");
 
   for (int i = 0, idx = f->inicio; i < f->total; i++, idx = (idx + 1) % MAX) {
     printf("[%s, %d] ", f->itens[idx].tipo, f->itens[idx].id);
@@ -65,10 +101,19 @@ void exibirFila(Fila *f) {
   printf("\n");
 }
 
+void peekPilha(Pilha *p) {
+    printf("Pilha Reserva: ");
+    for (int i = p->topo; i >= 0; i--) {
+        printf("[%s,%d] ", p->itens[i].tipo, p->itens[i].id);
+    }
+    printf("\n");
+}
+
 void menu() {
-    printf("\nMenu:\n");
-    printf("1 - Jogar peça (remover da frente)\n");
-    printf("2 - Inserir nova peça (adicionar ao fim)\n");
+    printf("\n===== MENU =====\n");
+    printf("1 - Jogar peça\n");
+    printf("2 - Reservar peça\n");
+    printf("3 - Usar peça da reserva\n");
     printf("0 - Sair\n");
     printf("Escolha uma opção: ");
 }
@@ -85,6 +130,7 @@ void gerarPeca(Peca *p, int *idGlobal) {
 int main() {
     srand(time(NULL));
     Fila f;
+    Pilha reserva;
     // 🧩 Nível Novato: Fila de Peças Futuras
     //
     // - Crie uma struct Peca com os campos: tipo (char) e id (int).
@@ -98,41 +144,57 @@ int main() {
     // - A cada remoção, insira uma nova peça ao final da fila.
     
     inicializarFila(&f);
+    inicializarPilha(&reserva);
 
-    int 
-
-    idGlobal = 1;
+    int idGlobal = 1;
     for (int i = 0; i < MAX; i++) {
         Peca nova;
         gerarPeca(&nova, &idGlobal);
         inserir(&f, &nova);
     }
-
     
     int opcao;
     do {
         exibirFila(&f);
+        peekPilha(&reserva);
         menu();
         scanf("%d", &opcao);
         printf("\n");
         
-        Peca removida, novaPeca;
+        Peca removida, novaPeca, temp;
     
         switch (opcao)
         {
         case 1:
-            ;
-            remover(&f, &removida);
-            printf("Peca jogada: [%s, %d]\n", removida.tipo, removida.id);
-            gerarPeca(&novaPeca, &idGlobal);
-            inserir(&f, &novaPeca);
+            // Jogar peça
+            remover(&f, &temp);
+            printf("Peca jogada: [%s, %d]\n", temp.tipo, temp.id);
+            gerarPeca(&temp, &idGlobal);
+            inserir(&f, &temp);
             break;
         case 2:
-            gerarPeca(&novaPeca, &idGlobal);
-            inserir(&f, &novaPeca);
-            printf("Nova peca inserida: [%s, %d]\n", novaPeca.tipo, novaPeca.id);
+            // Reservar peça
+            if (filaVazia(&f)) {
+                printf("Fila vazia! Nao e possivel reservar.\n");
+            } else if (pilhaCheia(&reserva)) {
+                printf("Pilha cheia! Nao e possivel reservar mais pecas.\n");
+            } else {
+                remover(&f, &temp);
+                push(&reserva, &temp);
+                gerarPeca(&temp, &idGlobal);
+                inserir(&f, &temp);
+                printf("Peca reservada: [%s, %d]\n", reserva.itens[reserva.topo].tipo, reserva.itens[reserva.topo].id);
+            }
             break;
-        
+        case 3:
+            // Usar peça da reserva
+            if (pilhaVazia(&reserva)) {
+                printf("Pilha vazia! Nao ha pecas para usar.\n");
+            } else {
+                pop(&reserva, &temp);
+                printf("Peca usada da reserva: [%s, %d]\n", temp.tipo, temp.id);
+            }
+            break;
         case 0:
             printf("Saindo...\n");
             break;
