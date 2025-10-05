@@ -101,7 +101,7 @@ void exibirFila(Fila *f) {
   printf("\n");
 }
 
-void peekPilha(Pilha *p) {
+void exibirPilha(Pilha *p) {
     printf("Pilha Reserva: ");
     for (int i = p->topo; i >= 0; i--) {
         printf("[%s,%d] ", p->itens[i].tipo, p->itens[i].id);
@@ -156,9 +156,10 @@ int main() {
     int opcao;
     do {
         exibirFila(&f);
-        peekPilha(&reserva);
+        exibirPilha(&reserva);
         menu();
         scanf("%d", &opcao);
+        getchar(); // Limpar o buffer do teclado
         printf("\n");
         
         Peca removida, novaPeca, temp;
