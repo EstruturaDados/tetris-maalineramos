@@ -124,6 +124,8 @@ int main() {
             ;
             remover(&f, &removida);
             printf("Peca jogada: [%s, %d]\n", removida.tipo, removida.id);
+            gerarPeca(&novaPeca, &idGlobal);
+            inserir(&f, &novaPeca);
             break;
         case 2:
             gerarPeca(&novaPeca, &idGlobal);
